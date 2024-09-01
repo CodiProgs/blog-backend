@@ -1,0 +1,11 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Mutation {
+  create(input: String!): String!
+}
+
+type Query {
+  hello: String!
+}
