@@ -8,7 +8,127 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name     String
+  email    String @unique
+  password String
+
+  nickname String @unique
+
+  avatar String  @default("avatars/default.svg")
+  bio    String?
+
+  provider Provider @default(LOCAL)
+
+  posts    Post[]
+  comments Comment[]
+  likes    Like[]
+
+  @@unique([email, provider])
+  @@map("user")
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  title   String
+  content String
+  slug    String @unique
+
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id])
+
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  comments Comment[]
+  tags     Tag[]
+  likes    Like[]
+  media    Media[]
+
+  @@map("post")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  content String
+
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id])
+
+  postId String @map("post_id")
+  post   Post   @relation(fields: [postId], references: [id])
+
+  parentId String?  @map("parent_id")
+  parent   Comment? @relation("parentChild", fields: [parentId], references: [id])
+
+  children Comment[] @relation("parentChild")
+
+  @@map("comment")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name String @unique
+  slug String @unique
+
+  posts Post[]
+
+  @@map("tag")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name String @unique
+  slug String @unique
+
+  posts Post[]
+
+  @@map("category")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  postId String @map("post_id")
+  post   Post   @relation(fields: [postId], references: [id])
+
+  @@map("like")
+}
+
+model Media {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  url String @unique
+
+  postId String @map("post_id")
+  post   Post   @relation(fields: [postId], references: [id])
+
+  @@map("media")
+}
+
+enum Provider {
+  LOCAL
+  GOOGLE
 }

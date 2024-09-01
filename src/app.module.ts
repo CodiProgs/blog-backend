@@ -3,7 +3,8 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
 import { join } from 'path'
-import { AppResolver } from './app.resolver'
+import { AuthModule } from './auth/auth.module'
+import { UserModule } from './user/user.module'
 
 @Module({
 	imports: [
@@ -15,8 +16,9 @@ import { AppResolver } from './app.resolver'
 			playground: true,
 			context: ({ req, res }) => ({ req, res })
 		}),
-		ConfigModule.forRoot()
-	],
-	providers: [AppResolver]
+		ConfigModule.forRoot(),
+		AuthModule,
+		UserModule
+	]
 })
 export class AppModule {}
