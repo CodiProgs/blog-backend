@@ -4,6 +4,12 @@ import { ConfigModule } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
 import { join } from 'path'
 import { AuthModule } from './auth/auth.module'
+import { CategoryModule } from './category/category.module'
+import { CommentModule } from './comment/comment.module'
+import { FileModule } from './file/file.module'
+import { LikeModule } from './like/like.module'
+import { PostModule } from './post/post.module'
+import { TagModule } from './tag/tag.module'
 import { UserModule } from './user/user.module'
 
 @Module({
@@ -18,7 +24,13 @@ import { UserModule } from './user/user.module'
 		}),
 		ConfigModule.forRoot(),
 		AuthModule,
-		UserModule
+		UserModule,
+		PostModule,
+		TagModule,
+		CategoryModule,
+		LikeModule,
+		FileModule,
+		CommentModule
 	]
 })
 export class AppModule {}
