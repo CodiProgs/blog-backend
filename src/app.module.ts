@@ -11,7 +11,6 @@ import { FileModule } from './file/file.module'
 import { UPLOADS_FOLDER } from './file/file.service'
 import { LikeModule } from './like/like.module'
 import { PostModule } from './post/post.module'
-import { TagModule } from './tag/tag.module'
 import { UserModule } from './user/user.module'
 
 @Module({
@@ -31,7 +30,6 @@ import { UserModule } from './user/user.module'
 		AuthModule,
 		UserModule,
 		PostModule,
-		TagModule,
 		CategoryModule,
 		LikeModule,
 		FileModule,

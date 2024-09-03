@@ -46,7 +46,7 @@ export class UserResolver {
 		@CurrentUser() user: UserType,
 		@Args('avatar', { type: () => GraphQLUpload }) avatar: FileUpload
 	) {
-		const avatarPath = await this.fileService.save(avatar, 'avatars', 'image')
+		const avatarPath = await this.fileService.save(avatar, 'avatars', ['image'])
 
 		if (user.avatar !== 'avatars/default.svg') {
 			await this.fileService.delete(user.avatar)

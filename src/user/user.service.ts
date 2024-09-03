@@ -9,6 +9,7 @@ import { Provider } from '@prisma/client'
 import { hash, verify } from 'argon2'
 import { RegisterDto } from 'src/auth/dto/register.dto'
 import { LoginSocialDto } from 'src/auth/dto/social-login.dto'
+import { FileService } from 'src/file/file.service'
 import { PrismaService } from 'src/prisma.service'
 import { UpdateUserPasswordDto } from './dto/update-password.dto'
 import { UserDto } from './dto/user.dto'
@@ -16,7 +17,10 @@ import { UserType } from './type/user.type'
 
 @Injectable()
 export class UserService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly fileService: FileService
+	) {}
 
 	async getById(id: string) {
 		return this.prisma.user.findUnique({
@@ -112,9 +116,12 @@ export class UserService {
 	}
 
 	async delete(id: string, user: UserType) {
+		// TODO: add notification to user when deleted by admin
 		if (id !== user.id && user.role !== 'ADMIN') {
 			throw new ForbiddenException('You cannot delete another user')
 		}
+
+		await this.fileService.delete(user.avatar)
 
 		return this.prisma.user.delete({
 			where: { id }

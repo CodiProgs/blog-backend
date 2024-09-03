@@ -41,16 +41,18 @@ model Post {
   content String
   slug    String @unique
 
+  views Int @default(0)
+
   authorId String @map("author_id")
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  categoryId String?   @map("category_id")
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId String   @map("category_id")
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  media Media?
+  mediaId String? @unique @map("media_id")
+  media   Media?  @relation(fields: [mediaId], references: [id], onDelete: SetNull)
 
   comments Comment[]
-  tags     Tag[]
   likes    Like[]
 
   @@map("post")
@@ -75,19 +77,6 @@ model Comment {
   children Comment[] @relation("parentChild")
 
   @@map("comment")
-}
-
-model Tag {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  name String @unique
-  slug String @unique
-
-  posts Post[]
-
-  @@map("tag")
 }
 
 model Category {
@@ -127,8 +116,7 @@ model Media {
   url  String @unique
   type String
 
-  postId String @unique @map("post_id")
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post Post?
 
   @@map("media")
 }

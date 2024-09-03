@@ -2,6 +2,7 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import * as cookieParser from 'cookie-parser'
+import { graphqlUploadExpress } from 'graphql-upload-ts'
 import { AppModule } from './app.module'
 import { GraphQLErrorFilter } from './common/filters'
 
@@ -13,6 +14,7 @@ async function bootstrap() {
 		credentials: true
 	})
 	app.use(cookieParser())
+	app.use(graphqlUploadExpress({ maxFileSize: 100000000, maxFiles: 1 }))
 	app.useGlobalPipes(
 		new ValidationPipe({
 			whitelist: true,

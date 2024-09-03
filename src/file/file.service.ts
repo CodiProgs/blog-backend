@@ -10,9 +10,9 @@ import { mkdir, unlink } from 'fs/promises'
 import { FileUpload } from 'graphql-upload-ts'
 import { dirname, extname, join } from 'path'
 
-const ALLOWED_FILE_TYPES = {
-	image: ['image/jpeg', 'image/png'],
-	video: ['video/mp4']
+export const ALLOWED_FILE_TYPES = {
+	image: ['image/jpeg', 'image/png', 'image/webp'],
+	video: ['video/mp4', 'video/quicktime']
 }
 
 export const UPLOADS_FOLDER = 'uploads'
@@ -22,10 +22,21 @@ export class FileService {
 	async save(
 		{ createReadStream, filename, mimetype }: FileUpload,
 		folder: string,
-		fileType: 'image' | 'video'
+		fileTypes: ('image' | 'video')[]
 	): Promise<string> {
-		if (!ALLOWED_FILE_TYPES[fileType].includes(mimetype)) {
-			throw new BadRequestException(`Invalid format for ${fileType}`)
+		let isValidType = false
+
+		for (const fileType of fileTypes) {
+			if (ALLOWED_FILE_TYPES[fileType].includes(mimetype)) {
+				isValidType = true
+				break
+			}
+		}
+
+		if (!isValidType) {
+			throw new BadRequestException(
+				`Invalid format. Allowed formats are ${fileTypes.join(', ')}`
+			)
 		}
 
 		const date = new Date()
@@ -52,7 +63,7 @@ export class FileService {
 			})
 		} catch (err) {
 			console.error(`Error saving file: ${outputPath}`, err)
-			throw new Error(`Failed to save file: ${filename}`)
+			throw new InternalServerErrorException(`Failed to save file: ${filename}`)
 		}
 	}
 
@@ -75,5 +86,14 @@ export class FileService {
 				)
 			}
 		}
+	}
+
+	getFileTypeByMimeType(mimeType: string): string | null {
+		for (const [fileType, mimeTypes] of Object.entries(ALLOWED_FILE_TYPES)) {
+			if (mimeTypes.includes(mimeType)) {
+				return fileType
+			}
+		}
+		return null
 	}
 }
