@@ -9,5 +9,5 @@ export class MediaType {
 
 	@Field() type: string
 
-	@Field(() => PostType) post: PostType
+	@Field(() => PostType) post?: PostType
 }

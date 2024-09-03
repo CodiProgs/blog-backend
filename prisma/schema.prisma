@@ -41,15 +41,16 @@ model Post {
   slug    String @unique
 
   authorId String @map("author_id")
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   categoryId String?   @map("category_id")
-  category   Category? @relation(fields: [categoryId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  media Media?
 
   comments Comment[]
   tags     Tag[]
   likes    Like[]
-  media    Media[]
 
   @@map("post")
 }
@@ -62,13 +63,13 @@ model Comment {
   content String
 
   authorId String @map("author_id")
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   postId String @map("post_id")
-  post   Post   @relation(fields: [postId], references: [id])
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   parentId String?  @map("parent_id")
-  parent   Comment? @relation("parentChild", fields: [parentId], references: [id])
+  parent   Comment? @relation("parentChild", fields: [parentId], references: [id], onDelete: SetNull)
 
   children Comment[] @relation("parentChild")
 
@@ -107,10 +108,10 @@ model Like {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   userId String @map("user_id")
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   postId String @map("post_id")
-  post   Post   @relation(fields: [postId], references: [id])
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@map("like")
 }
@@ -123,8 +124,8 @@ model Media {
   url  String @unique
   type String
 
-  postId String @map("post_id")
-  post   Post   @relation(fields: [postId], references: [id])
+  postId String @unique @map("post_id")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@map("media")
 }

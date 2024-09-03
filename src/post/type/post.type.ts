@@ -1,10 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { CategoryType } from 'src/category/type/category.type'
 import { CommentType } from 'src/comment/type/comment.type'
-import { MediaType } from 'src/file/type/media.type'
 import { LikeType } from 'src/like/type/like.type'
 import { TagType } from 'src/tag/type/tag.type'
 import { UserType } from 'src/user/type/user.type'
+import { MediaType } from './media.type'
 
 @ObjectType()
 export class PostType {
@@ -18,15 +18,15 @@ export class PostType {
 
 	@Field() slug: string
 
-	@Field(() => UserType) author: UserType
+	@Field(() => UserType) author?: UserType
 
-	@Field(() => CategoryType) category: CategoryType
+	@Field(() => CategoryType) category?: CategoryType
 
-	@Field(() => [CommentType]) comments: CommentType[]
+	@Field(() => MediaType) media?: MediaType
 
-	@Field(() => [TagType]) tags: TagType[]
+	@Field(() => [CommentType]) comments?: CommentType[]
 
-	@Field(() => [LikeType]) likes: LikeType[]
+	@Field(() => [TagType]) tags?: TagType[]
 
-	@Field(() => [MediaType]) media: MediaType[]
+	@Field(() => [LikeType]) likes?: LikeType[]
 }

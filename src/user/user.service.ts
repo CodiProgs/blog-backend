@@ -1,10 +1,15 @@
-import { Injectable } from '@nestjs/common'
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException
+} from '@nestjs/common'
 import { createId } from '@paralleldrive/cuid2'
 import { Provider } from '@prisma/client'
-import { hash } from 'argon2'
+import { hash, verify } from 'argon2'
 import { RegisterDto } from 'src/auth/dto/register.dto'
 import { LoginSocialDto } from 'src/auth/dto/social-login.dto'
 import { PrismaService } from 'src/prisma.service'
+import { UpdateUserPasswordDto } from './dto/update-password.dto'
 import { UserDto } from './dto/user.dto'
 
 @Injectable()
@@ -61,9 +66,44 @@ export class UserService {
 		})
 	}
 
-	// update avatar
-	// update nickname with the help of generateNickname
-	// update password
+	async updateAvatar(id: string, avatar: string) {
+		return this.prisma.user.update({
+			where: { id },
+			data: { avatar }
+		})
+	}
+
+	async updateNickname(id: string, nickname: string) {
+		const isUnique = await this.isNicknameUnique(nickname)
+
+		if (!isUnique) {
+			throw new BadRequestException({ form: 'Nickname is already taken' })
+		}
+
+		return this.prisma.user.update({
+			where: { id },
+			data: { nickname }
+		})
+	}
+
+	async updatePassword(id: string, dto: UpdateUserPasswordDto) {
+		const user = await this.getById(id)
+
+		if (!user) {
+			throw new NotFoundException('User not found')
+		}
+
+		const isValidPassword = await verify(user.password, dto.password)
+		if (!isValidPassword)
+			throw new BadRequestException({ form: 'Invalid password' })
+
+		const password = await hash(dto.newPassword)
+
+		return this.prisma.user.update({
+			where: { id },
+			data: { password }
+		})
+	}
 
 	private async generateNickname(name: string) {
 		let nickname = name
@@ -82,7 +122,7 @@ export class UserService {
 		return nickname
 	}
 
-	private async isNicknameUnique(nickname: string) {
+	async isNicknameUnique(nickname: string) {
 		const user = await this.prisma.user.findUnique({
 			where: { nickname }
 		})

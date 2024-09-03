@@ -10,11 +10,11 @@ export class CommentType {
 
 	@Field() content: string
 
-	@Field(() => UserType) author: UserType
+	@Field(() => UserType) author?: UserType
 
-	@Field(() => PostType) post: PostType
+	@Field(() => PostType) post?: PostType
 
-	@Field(() => CommentType, { nullable: true }) parent?: CommentType
+	@Field(() => CommentType) parent?: CommentType
 
-	@Field(() => [CommentType]) children: CommentType[]
+	@Field(() => [CommentType]) children?: CommentType[]
 }

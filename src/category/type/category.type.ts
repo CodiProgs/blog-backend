@@ -9,5 +9,5 @@ export class CategoryType {
 
 	@Field() slug: string
 
-	@Field(() => PostType) posts: PostType[]
+	@Field(() => PostType) posts?: PostType[]
 }

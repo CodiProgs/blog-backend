@@ -9,5 +9,5 @@ export class TagType {
 
 	@Field() slug: string
 
-	@Field(() => [PostType]) posts: PostType[]
+	@Field(() => [PostType]) posts?: PostType[]
 }
