@@ -20,6 +20,12 @@ export class UserResolver {
 	}
 
 	@Auth()
+	@Query(() => [UserType])
+	async users() {
+		return this.userService.getAll()
+	}
+
+	@Auth()
 	@Query(() => Boolean)
 	async isNicknameUnique(@Args('nickname') nickname: string) {
 		return await this.userService.isNicknameUnique(nickname)
@@ -65,5 +71,11 @@ export class UserResolver {
 		@Args('updateUserPasswordInput') dto: UpdateUserPasswordDto
 	) {
 		return this.userService.updatePassword(id, dto)
+	}
+
+	@Auth()
+	@Mutation(() => UserType)
+	async deleteUser(@CurrentUser() user: UserType, @Args('id') id: string) {
+		return this.userService.delete(id, user)
 	}
 }

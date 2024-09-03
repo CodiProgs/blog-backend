@@ -22,6 +22,7 @@ model User {
   bio    String?
 
   provider Provider @default(LOCAL)
+  role     UserRole @default(USER)
 
   posts    Post[]
   comments Comment[]
@@ -97,6 +98,8 @@ model Category {
   name String @unique
   slug String @unique
 
+  description String?
+
   posts Post[]
 
   @@map("category")
@@ -133,4 +136,9 @@ model Media {
 enum Provider {
   LOCAL
   GOOGLE
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }

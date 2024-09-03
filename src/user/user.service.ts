@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	ForbiddenException,
 	Injectable,
 	NotFoundException
 } from '@nestjs/common'
@@ -11,6 +12,7 @@ import { LoginSocialDto } from 'src/auth/dto/social-login.dto'
 import { PrismaService } from 'src/prisma.service'
 import { UpdateUserPasswordDto } from './dto/update-password.dto'
 import { UserDto } from './dto/user.dto'
+import { UserType } from './type/user.type'
 
 @Injectable()
 export class UserService {
@@ -32,6 +34,10 @@ export class UserService {
 		return this.prisma.user.findUnique({
 			where: { email_provider: { email, provider } }
 		})
+	}
+
+	async getAll() {
+		return this.prisma.user.findMany()
 	}
 
 	async create(dto: RegisterDto) {
@@ -102,6 +108,16 @@ export class UserService {
 		return this.prisma.user.update({
 			where: { id },
 			data: { password }
+		})
+	}
+
+	async delete(id: string, user: UserType) {
+		if (id !== user.id && user.role !== 'ADMIN') {
+			throw new ForbiddenException('You cannot delete another user')
+		}
+
+		return this.prisma.user.delete({
+			where: { id }
 		})
 	}
 
