@@ -46,4 +46,10 @@ export class PostResolver {
 	async deletePost(@Args('id') id: string, @CurrentUser() user: UserType) {
 		return this.postService.delete(id, user)
 	}
+
+	@Auth()
+	@Mutation(() => PostType)
+	async incrementPostViews(@Args('id') id: string) {
+		return this.postService.incrementViews(id)
+	}
 }

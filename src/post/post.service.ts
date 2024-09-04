@@ -362,4 +362,17 @@ export class PostService {
 
 		return post
 	}
+
+	async incrementViews(id: string) {
+		return this.prisma.post.update({
+			where: {
+				id
+			},
+			data: {
+				views: {
+					increment: 1
+				}
+			}
+		})
+	}
 }
