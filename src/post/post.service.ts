@@ -60,7 +60,13 @@ export class PostService {
 				include: {
 					category: true,
 					author: true,
-					comments: true,
+					comments: {
+						include: {
+							author: true,
+							children: true,
+							parent: true
+						}
+					},
 					media: true,
 					likes: true
 				}
@@ -107,7 +113,13 @@ export class PostService {
 				include: {
 					category: true,
 					author: true,
-					comments: true,
+					comments: {
+						include: {
+							author: true,
+							children: true,
+							parent: true
+						}
+					},
 					media: true,
 					likes: true
 				},
@@ -149,7 +161,13 @@ export class PostService {
 			include: {
 				category: true,
 				author: true,
-				comments: true,
+				comments: {
+					include: {
+						author: true,
+						children: true,
+						parent: true
+					}
+				},
 				media: true,
 				likes: true
 			}
@@ -179,13 +197,20 @@ export class PostService {
 			})
 		}
 
-		const cuid = createId()
-		const slug = data.title.toLowerCase().replace(/ /g, '-') + '-' + cuid
+		let uniqueSlug =
+			data.title.toLowerCase().replace(/ /g, '-') + '-' + createId()
+		let slugExists = await this.getBySlug(uniqueSlug)
+
+		while (slugExists) {
+			uniqueSlug =
+				data.title.toLowerCase().replace(/ /g, '-') + '-' + createId()
+			slugExists = await this.getBySlug(uniqueSlug)
+		}
 
 		const post = await this.prisma.post.create({
 			data: {
 				...data,
-				slug,
+				slug: uniqueSlug,
 				author: {
 					connect: {
 						id: userId
@@ -207,7 +232,13 @@ export class PostService {
 			include: {
 				category: true,
 				author: true,
-				comments: true,
+				comments: {
+					include: {
+						author: true,
+						children: true,
+						parent: true
+					}
+				},
 				media: true,
 				likes: true
 			}

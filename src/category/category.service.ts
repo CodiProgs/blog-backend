@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common'
+import { ConflictException, Injectable } from '@nestjs/common'
 import { PostQueryParamsDto } from 'src/post/dto/query-params.dto'
 import { PrismaService } from 'src/prisma.service'
+import { CategoryDto } from './dto/category.dto'
 
 @Injectable()
 export class CategoryService {
@@ -60,5 +61,59 @@ export class CategoryService {
 				skip: skipPosts
 			}
 		}
+	}
+
+	async getOne(slug: string) {
+		return this.prisma.category.findUnique({
+			where: {
+				slug
+			},
+			include: {
+				posts: true
+			}
+		})
+	}
+
+	async create(dto: CategoryDto) {
+		const isSlugUnique = await this.isSlugUnique(dto.slug)
+
+		if (!isSlugUnique) {
+			throw new ConflictException({
+				form: 'Category with this slug already exists'
+			})
+		}
+
+		return this.prisma.category.create({
+			data: dto
+		})
+	}
+
+	async update(id: string, dto: CategoryDto) {
+		const isSlugUnique = await this.isSlugUnique(dto.slug)
+
+		if (!isSlugUnique) {
+			throw new ConflictException({
+				form: 'Category with this slug already exists'
+			})
+		}
+
+		return this.prisma.category.update({
+			where: {
+				id
+			},
+			data: dto
+		})
+	}
+
+	async delete(id: string) {
+		return this.prisma.category.delete({
+			where: {
+				id
+			}
+		})
+	}
+
+	async isSlugUnique(slug: string) {
+		return !(await this.getOne(slug))
 	}
 }

@@ -10,11 +10,13 @@ export class CommentType {
 
 	@Field() content: string
 
+	@Field() isDeleted: boolean
+
 	@Field(() => UserType) author?: UserType
 
 	@Field(() => PostType) post?: PostType
 
-	@Field(() => CommentType) parent?: CommentType
+	@Field(() => CommentType, { nullable: true }) parent?: CommentType
 
 	@Field(() => [CommentType]) children?: CommentType[]
 }
