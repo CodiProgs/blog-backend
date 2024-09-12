@@ -14,9 +14,9 @@ export class CommentType {
 
 	@Field(() => UserType) author?: UserType
 
-	@Field(() => PostType) post?: PostType
+	@Field(() => PostType, { nullable: true }) post?: PostType
 
 	@Field(() => CommentType, { nullable: true }) parent?: CommentType
 
-	@Field(() => [CommentType]) children?: CommentType[]
+	@Field(() => [CommentType], { nullable: true }) children?: CommentType[]
 }

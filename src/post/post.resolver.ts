@@ -11,11 +11,13 @@ import { PostResponseType } from './type/response.type'
 export class PostResolver {
 	constructor(private postService: PostService) {}
 
+	@Auth('OPTIONAL')
 	@Query(() => PostResponseType)
 	async posts(
-		@Args('queryParams') query: PostQueryParamsDto
+		@Args('queryParams') query: PostQueryParamsDto,
+		@CurrentUser('id') userId: string | null
 	): Promise<PostResponseType> {
-		return this.postService.getAll(query)
+		return this.postService.getAll(query, userId)
 	}
 
 	@Query(() => PostType, { nullable: true })

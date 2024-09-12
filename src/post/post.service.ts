@@ -4,9 +4,11 @@ import {
 	NotFoundException
 } from '@nestjs/common'
 import { createId } from '@paralleldrive/cuid2'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { subDays } from 'date-fns'
 import { CategoryService } from 'src/category/category.service'
 import { FileService } from 'src/file/file.service'
+import { LikeService } from 'src/like/like.service'
 import { PrismaService } from 'src/prisma.service'
 import { UserType } from 'src/user/type/user.type'
 import { PostDto } from './dto/post.dto'
@@ -28,17 +30,21 @@ export class PostService {
 	constructor(
 		private prisma: PrismaService,
 		private categoryService: CategoryService,
-		private fileService: FileService
+		private fileService: FileService,
+		private likeService: LikeService
 	) {}
 
-	async getAll({
-		skipCategories,
-		skip,
-		take,
-		orderBy,
-		timePeriod,
-		categoryId
-	}: PostQueryParamsDto): Promise<PostResponseType> {
+	async getAll(
+		{
+			skipCategories,
+			skip,
+			take,
+			orderBy,
+			timePeriod,
+			categoryId
+		}: PostQueryParamsDto,
+		currentUserId?: string
+	): Promise<PostResponseType> {
 		if (categoryId) {
 			const posts = await this.prisma.post.findMany({
 				where: {
@@ -60,20 +66,28 @@ export class PostService {
 				include: {
 					category: true,
 					author: true,
-					comments: {
-						include: {
-							author: true,
-							children: true,
-							parent: true
-						}
-					},
 					media: true,
-					likes: true
+					_count: { select: { comments: true, likes: true } }
 				}
 			})
 
+			const transformedPosts = await Promise.all(
+				posts.map(async post => {
+					const isLiked = currentUserId
+						? await this.likeService.isLiked(currentUserId, post.id)
+						: false
+
+					return {
+						...post,
+						commentsCount: post._count.comments,
+						likesCount: post._count.likes,
+						isLiked
+					}
+				})
+			)
+
 			return {
-				posts,
+				posts: transformedPosts,
 				queryParams: {
 					skipCategories,
 					skip: skip + take
@@ -113,15 +127,8 @@ export class PostService {
 				include: {
 					category: true,
 					author: true,
-					comments: {
-						include: {
-							author: true,
-							children: true,
-							parent: true
-						}
-					},
 					media: true,
-					likes: true
+					_count: { select: { comments: true, likes: true } }
 				},
 				skip: queryParams.skip,
 				orderBy: {
@@ -131,8 +138,17 @@ export class PostService {
 				}
 			})
 
+			const isLiked = currentUserId
+				? await this.likeService.isLiked(currentUserId, post.id)
+				: false
+
 			if (post) {
-				posts.push(post)
+				posts.push({
+					...post,
+					commentsCount: post._count.comments,
+					likesCount: post._count.likes,
+					isLiked
+				})
 				totalAttempts = 0
 			} else totalAttempts++
 
@@ -153,28 +169,37 @@ export class PostService {
 		}
 	}
 
-	async getBySlug(slug: string) {
-		return this.prisma.post.findUnique({
+	async getBySlug(
+		slug: string,
+		currentUserId?: string
+	): Promise<PostType | null> {
+		const post = await this.prisma.post.findUnique({
 			where: {
 				slug
 			},
 			include: {
 				category: true,
 				author: true,
-				comments: {
-					include: {
-						author: true,
-						children: true,
-						parent: true
-					}
-				},
 				media: true,
-				likes: true
+				_count: { select: { comments: true, likes: true } }
 			}
 		})
+
+		if (!post) return null
+
+		const isLiked = currentUserId
+			? await this.likeService.isLiked(currentUserId, post.id)
+			: false
+
+		return {
+			...post,
+			commentsCount: post._count.comments,
+			likesCount: post._count.likes,
+			isLiked
+		}
 	}
 
-	async create(userId: string, dto: PostDto) {
+	async create(userId: string, dto: PostDto): Promise<PostType> {
 		const { categoryId, media, ...data } = dto
 
 		const mediaFile = await media
@@ -232,19 +257,21 @@ export class PostService {
 			include: {
 				category: true,
 				author: true,
-				comments: {
-					include: {
-						author: true,
-						children: true,
-						parent: true
-					}
-				},
 				media: true,
-				likes: true
+				_count: { select: { comments: true, likes: true } }
 			}
 		})
 
-		return post
+		const isLiked = userId
+			? await this.likeService.isLiked(userId, post.id)
+			: false
+
+		return {
+			...post,
+			commentsCount: post._count.comments,
+			likesCount: post._count.likes,
+			isLiked
+		}
 	}
 
 	async update(id: string, dto: PostDto) {
@@ -364,15 +391,26 @@ export class PostService {
 	}
 
 	async incrementViews(id: string) {
-		return this.prisma.post.update({
-			where: {
-				id
-			},
-			data: {
-				views: {
-					increment: 1
+		try {
+			return await this.prisma.post.update({
+				where: {
+					id
+				},
+				data: {
+					views: {
+						increment: 1
+					}
 				}
+			})
+		} catch (error) {
+			if (
+				error instanceof PrismaClientKnownRequestError &&
+				error.code === 'P2025'
+			) {
+				throw new NotFoundException('Post not found')
+			} else {
+				throw error
 			}
-		})
+		}
 	}
 }

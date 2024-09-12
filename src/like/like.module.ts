@@ -4,6 +4,7 @@ import { LikeResolver } from './like.resolver'
 import { LikeService } from './like.service'
 
 @Module({
-	providers: [LikeService, LikeResolver, PrismaService]
+	providers: [LikeService, LikeResolver, PrismaService],
+	exports: [LikeService]
 })
 export class LikeModule {}

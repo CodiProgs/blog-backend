@@ -16,15 +16,17 @@ export class UserType {
 
 	@Field() avatar: string
 
-	@Field(() => UserRole) role: UserRole
+	@Field() createdAt: Date
 
 	@Field({ nullable: true }) bio?: string
 
-	@Field(() => [PostType]) posts?: PostType[]
+	@Field(() => UserRole, { nullable: true }) role: UserRole
 
-	@Field(() => [CommentType]) comments?: CommentType[]
+	@Field(() => [PostType], { nullable: true }) posts?: PostType[]
 
-	@Field(() => [LikeType]) likes?: LikeType[]
+	@Field(() => [CommentType], { nullable: true }) comments?: CommentType[]
+
+	@Field(() => [LikeType], { nullable: true }) likes?: LikeType[]
 }
 
 registerEnumType(UserRole, {

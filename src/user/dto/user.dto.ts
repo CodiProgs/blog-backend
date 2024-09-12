@@ -25,6 +25,6 @@ export class UserDto {
 	@Field({ nullable: true })
 	@IsOptional()
 	@IsString()
-	@MaxLength(100)
+	@MaxLength(200)
 	bio?: string
 }

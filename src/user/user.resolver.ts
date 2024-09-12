@@ -14,12 +14,15 @@ export class UserResolver {
 		private readonly fileService: FileService
 	) {}
 
+	@Auth('OPTIONAL')
 	@Query(() => UserType, { nullable: true })
-	async profile(@Args('nickname') nickname: string) {
-		return this.userService.getByNickname(nickname)
+	async profile(
+		@Args('nickname') nickname: string,
+		@CurrentUser('id') id: string | null
+	) {
+		return this.userService.getByNickname(nickname, id)
 	}
 
-	@Auth()
 	@Query(() => [UserType])
 	async users() {
 		return this.userService.getAll()

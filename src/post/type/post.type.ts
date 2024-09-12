@@ -1,7 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { CategoryType } from 'src/category/type/category.type'
-import { CommentType } from 'src/comment/type/comment.type'
-import { LikeType } from 'src/like/type/like.type'
 import { UserType } from 'src/user/type/user.type'
 import { MediaType } from './media.type'
 
@@ -19,13 +17,15 @@ export class PostType {
 
 	@Field() views: number
 
+	@Field() commentsCount: number
+
+	@Field() likesCount: number
+
+	@Field() isLiked: boolean
+
 	@Field(() => UserType) author?: UserType
 
 	@Field(() => CategoryType) category?: CategoryType
 
 	@Field(() => MediaType, { nullable: true }) media?: MediaType
-
-	@Field(() => [CommentType]) comments?: CommentType[]
-
-	@Field(() => [LikeType]) likes?: LikeType[]
 }

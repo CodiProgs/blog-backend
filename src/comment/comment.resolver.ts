@@ -1,5 +1,6 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 import { Auth, CurrentUser } from 'src/auth/decorators'
+import { UserType } from 'src/user/type/user.type'
 import { CommentService } from './comment.service'
 import { CommentDto } from './dto/comment.dto'
 import { CommentType } from './type/comment.type'
@@ -28,7 +29,7 @@ export class CommentResolver {
 
 	@Auth()
 	@Mutation(() => CommentType)
-	async deleteComment(@Args('id') id: string) {
-		return this.commentService.delete(id)
+	async deleteComment(@Args('id') id: string, @CurrentUser() user: UserType) {
+		return this.commentService.delete(id, user)
 	}
 }

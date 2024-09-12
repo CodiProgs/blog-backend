@@ -21,7 +21,7 @@ export class PostDto {
 	@IsString()
 	@IsNotEmpty()
 	@MinLength(3)
-	@MaxLength(200)
+	@MaxLength(5000)
 	content: string
 
 	@Field()

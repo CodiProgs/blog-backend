@@ -6,7 +6,7 @@ import { UserType } from 'src/user/type/user.type'
 export class LikeType {
 	@Field() id: string
 
-	@Field(() => UserType) user?: UserType
+	@Field(() => UserType, { nullable: true }) user?: UserType
 
-	@Field(() => PostType) post?: PostType
+	@Field(() => PostType, { nullable: true }) post?: PostType
 }

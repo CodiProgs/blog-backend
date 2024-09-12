@@ -1,4 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common'
+import {
+	ConflictException,
+	Injectable,
+	NotFoundException
+} from '@nestjs/common'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PostQueryParamsDto } from 'src/post/dto/query-params.dto'
 import { PrismaService } from 'src/prisma.service'
 import { CategoryDto } from './dto/category.dto'
@@ -97,20 +102,42 @@ export class CategoryService {
 			})
 		}
 
-		return this.prisma.category.update({
-			where: {
-				id
-			},
-			data: dto
-		})
+		try {
+			return await this.prisma.category.update({
+				where: {
+					id
+				},
+				data: dto
+			})
+		} catch (error) {
+			if (
+				error instanceof PrismaClientKnownRequestError &&
+				error.code === 'P2025'
+			) {
+				throw new NotFoundException('Category not found')
+			} else {
+				throw error
+			}
+		}
 	}
 
 	async delete(id: string) {
-		return this.prisma.category.delete({
-			where: {
-				id
+		try {
+			return await this.prisma.category.delete({
+				where: {
+					id
+				}
+			})
+		} catch (error) {
+			if (
+				error instanceof PrismaClientKnownRequestError &&
+				error.code === 'P2025'
+			) {
+				throw new NotFoundException('Category not found')
+			} else {
+				throw error
 			}
-		})
+		}
 	}
 
 	async isSlugUnique(slug: string) {

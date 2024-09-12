@@ -77,7 +77,7 @@ export class AuthService {
 
 		const tokens = this.issueTokens(user.id)
 
-		return { ...tokens }
+		return { ...tokens, user }
 	}
 
 	private issueTokens(userId: string) {
